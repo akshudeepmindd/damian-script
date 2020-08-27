@@ -2,10 +2,11 @@ var spawn = require('child_process').spawn
 // Load the AWS SDK for Node.js
 var AWS = require('aws-sdk')
 // Set the region
+require('dotenv').config()
 AWS.config.update({
   credentials: {
-    accessKeyId: 'AKIAXQH5EYSDJKFWF6VK',
-    secretAccessKey: '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',
+    accessKeyId: process.env.ACCESS_KEY,
+    secretAccessKey: process.env.SCERET_KEY,
   },
   region: 'ap-southeast-1',
 })
