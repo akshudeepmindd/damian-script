@@ -44,33 +44,37 @@ const s3 = new AWS.S3({ apiVersion: '2006-03-01' })
 
           proc.on('close', function (data) {
             console.log(data, 'finished')
-            const fileContent = fs.readFileSync(`${fileName[2]}.mp4`)
+            if (fs.existsSync(`${fileName[2]}.mp4`)) {
+              const fileContent = fs.readFileSync(`${fileName[2]}.mp4`)
 
-            // Setting up S3 upload parameters
-            const params = {
-              Bucket: 'convertedvydo',
-              Key: `${fileName[2]}.mp4`, // File name you want to save as in S3
-              Body: fileContent,
-            }
-
-            // Uploading files to the bucket
-            s3.upload(params, function (err, data) {
-              if (err) {
-                throw err
+              // Setting up S3 upload parameters
+              const params = {
+                Bucket: 'convertedvydo',
+                Key: `${fileName[2]}.mp4`, // File name you want to save as in S3
+                Body: fileContent,
               }
-              let deleteproc = cmd.run(`rm -rf ${fileName[2]}.mp4`)
-              deleteproc.stdout.on('data', function (data) {
-                console.log(data)
+
+              // Uploading files to the bucket
+              s3.upload(params, function (err, data) {
+                if (err) {
+                  throw err
+                }
+                let deleteproc = cmd.run(`rm -rf ${fileName[2]}.mp4`)
+                deleteproc.stdout.on('data', function (data) {
+                  console.log(data)
+                })
+                deleteproc.stderr.setEncoding('utf8')
+                deleteproc.stderr.on('data', function (data) {
+                  console.log(data)
+                })
+                deleteproc.on('close', function (data) {
+                  console.log('deleted')
+                })
+                console.log(`File uploaded successfully. ${data.Location}`)
               })
-              deleteproc.stderr.setEncoding('utf8')
-              deleteproc.stderr.on('data', function (data) {
-                console.log(data)
-              })
-              deleteproc.on('close', function (data) {
-                console.log('deleted')
-              })
-              console.log(`File uploaded successfully. ${data.Location}`)
-            })
+            } else {
+              console.log('move to next file')
+            }
           })
         })
       }
